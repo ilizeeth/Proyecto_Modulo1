@@ -13,4 +13,6 @@ Proyecto_Modulo1/
     └── serieTiempo/
     │    ├── main.py
     │
+    └── BD.csv
+    │
     └── main.py
