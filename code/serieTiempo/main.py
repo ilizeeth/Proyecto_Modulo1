@@ -1,28 +1,52 @@
-import pandas as pd
+import os
 import matplotlib.pyplot as plt
+import math
 
-# Cargar datos de la base de datos
-data = pd.read_csv('datos.csv')  #'datos.csv' con los datos
+# Obtener la lista de archivos CSV en el directorio actual
+archivos = [archivo for archivo in os.listdir() if archivo.endswith('.csv')]
+
+def validar_lugar(nombre_lugar):
+    # Leer los archivos CSV y obtener la lista de lugares
+    lugares = set()
+    for archivo in archivos:
+        with open(archivo, 'r') as file:
+            for linea in file:
+                lugar = linea.strip().split(',')[0]  # Supongamos que el lugar está en la primera columna
+                lugares.add(lugar)
+    
+    return nombre_lugar in lugares
 
 def obtener_datos_lugar(nombre_lugar):
     while True:
-        # Validar si el lugar existe en la base de datos
-        if nombre_lugar == 'Nacional' or nombre_lugar in data['Lugar'].unique():
-            datos_lugar = data[data['Lugar'] == nombre_lugar]
+        if nombre_lugar == 'Nacional' or validar_lugar(nombre_lugar):
             break
         else:
             print("Lugar inválido.")
             nombre_lugar = input("Ingrese el nombre del lugar (puede ser el nombre del estado o 'Nacional'): ")
-
-    # Obtener lista de meses
-    datos_lugar['Fecha'] = pd.to_datetime(datos_lugar['Fecha'])
-    datos_lugar['Mes'] = datos_lugar['Fecha'].dt.strftime('%m-%Y')
     
-    # Calcular suma de casos confirmados por mes
-    casos_por_mes = datos_lugar.groupby('Mes')['Casos Confirmados'].sum().tolist()
+    # Obtener los datos del lugar seleccionado
+    datos = []
+    for archivo in archivos:
+        with open(archivo, 'r') as file:
+            for linea in file:
+                lugar, fecha, casos = linea.strip().split(',')  # Supongamos el formato del archivo CSV
+                if lugar == nombre_lugar:
+                    datos.append((fecha, int(casos)))
     
-    # Graficar serie de datos
-    plt.plot(datos_lugar['Mes'].unique(), casos_por_mes)
+    # Calcular la suma de casos confirmados por mes
+    casos_por_mes = {}
+    for fecha, casos in datos:
+        mes = fecha[3:10]  # Obtener el mes a partir del formato de fecha
+        if mes in casos_por_mes:
+            casos_por_mes[mes] += casos
+        else:
+            casos_por_mes[mes] = casos
+    
+    meses = sorted(casos_por_mes.keys())
+    casos = [casos_por_mes[mes] for mes in meses]
+    
+    # Graficar la serie de datos
+    plt.plot(meses, casos)
     plt.xlabel('Mes')
     plt.ylabel('Casos Confirmados')
     plt.title('Serie de datos por mes en ' + nombre_lugar)
