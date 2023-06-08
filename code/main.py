@@ -1,3 +1,5 @@
+import casosPoblacion.main as fn2
+
 def mostrar_menu(opciones): #Función para recorrer el diccionario
     print("\n\t\t\t\t\t\tMENÚ\n")
     print('\t\t',("-"*60))
@@ -39,7 +41,9 @@ def funcion1():
     pass 
 
 def funcion2():
-    pass 
+    print('\t\tObteniendo resultados...')
+    data = fn2.return_matriz()
+    fn2.graphics(data[0], data[1], data[2], data[3])
 
 def funcion3():
     pass 
