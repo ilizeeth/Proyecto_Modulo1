@@ -1,4 +1,6 @@
 import casosPoblacion.main as fn2
+import casosNacional.main as fn1
+import serieTiempo.main as fn3
 
 
 def mostrar_menu(opciones):  # Función para recorrer el diccionario
@@ -53,7 +55,14 @@ def salir():
 
 
 def funcion1():
-    pass
+    print('\t\tObteniendo resultados...')
+    datos = fn1.read_data_base()
+    resultado, estados = fn1.maximo_estados(datos)
+    resultado2, fecha2, estados2 = fn1.datos_tabla(datos)
+    r = fn1.transforma_datos(estados2, fecha2, resultado2)
+    titulos = ['Estado', 'Fecha', 'Máximo']
+
+    fn1.graphics(estados, resultado, r, titulos)
 
 
 def funcion2():
@@ -63,7 +72,7 @@ def funcion2():
 
 
 def funcion3():
-    pass
+    print('\t\tObteniendo resultados...')
 
 
 def main():
