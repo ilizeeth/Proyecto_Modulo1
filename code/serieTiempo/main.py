@@ -2,68 +2,112 @@ import os
 import matplotlib.pyplot as plt
 
 # Obtener la lista de archivos CSV en el directorio actual
-archivos = [archivo for archivo in os.listdir() if archivo.endswith('.csv')]
+path = os.path.dirname(__file__)
+archivo = path+'/../BD.csv'
 
 
-def validar_lugar(nombre_lugar):
-    # Leer los archivos CSV y obtener la lista de lugares
-    lugares = set()
-    for archivo in archivos:
-        with open(archivo, 'r') as file:
+def validate_state(estado):
+    # Leer archivo CSV y obtener la lista de lugares
+    estado = estado.upper()
+    estados = []
+
+    if estado == 'NACIONAL':
+        return True
+    else:
+        with open(archivo, 'r', encoding='utf-8') as file:
             for linea in file:
-                # Supongamos que el lugar está en la primera columna
-                lugar = linea.strip().split(',')[0]
-                lugares.add(lugar)
+                estadoLinea = linea.strip().split(',')[2][1:-1]
+                estados.append(estadoLinea)
 
-    return nombre_lugar in lugares
+        return estado in estados
+
+
+def sub_menu():
+    print("\n\t\t\t** Sistema de análisis de datos por lugar **\n")
+    print('\t', ("*"*75))
+    print(f'\t{" * Ingrese el nombre del lugar "}' +
+          f'{"(puede ser el nombre del Estado o Nacional)":6} *', end="")
+    print('\t', "")
+    print('\t', ("*"*75))
+
+    condicion = 0
+    while condicion != 1:
+        nombre_lugar = input(" >> ")
+
+        if validate_state(nombre_lugar):
+            obtener_datos_lugar(nombre_lugar)
+            condicion = 1
+            break
+        else:
+            print('\t', "-> Lugar inválido <-")
 
 
 def obtener_datos_lugar(nombre_lugar):
-    while True:
-        if nombre_lugar == 'Nacional' or validar_lugar(nombre_lugar):
-            break
-        else:
-            print("Lugar inválido.")
-            nombre_lugar = input(
-                "Ingrese el nombre del lugar (puede ser el"
-                "nombre del estado o 'Nacional'): ")
-
     # Obtener los datos del lugar seleccionado
-    datos = []
-    for archivo in archivos:
-        with open(archivo, 'r') as file:
-            for linea in file:
-                # Supongamos el formato del archivo CSV
-                lugar, fecha, casos = linea.strip().split(',')
-                if lugar == nombre_lugar:
-                    datos.append((fecha, int(casos)))
+    matriz = []
+    estadoSelect = ""
+    with open(archivo, 'r', encoding='utf-8') as file:
+        i = 0
+        for linea in file:
+            # Supongamos el formato del archivo CSV
+            estadoSelect = linea.strip().split(',')[2][1:-1]
+            if i == 0:
+                matriz.append(linea.strip().split(',')[3:])
 
-    # Calcular la suma de casos confirmados por mes
-    casos_por_mes = {}
-    for fecha, casos in datos:
-        mes = fecha[3:10]  # Obtener el mes a partir del formato de fecha
-        if mes in casos_por_mes:
-            casos_por_mes[mes] += casos
+            if estadoSelect.upper() == nombre_lugar.upper():
+                matriz.append(linea.strip().split(',')[3:])
+                break
+            i += 1
+
+    lista_a = matriz[0]
+    lista_b = matriz[1]
+    fechas = []
+    casosPorMes = []
+
+    ultimo_mes = lista_a[0].split("-")[1]  # obtenemos el mes
+
+    suma = 0
+    indice = 0
+    while (indice < len(lista_a)):
+        mes_actual = lista_a[indice].split("-")[1]
+        ano_actual = lista_a[indice].split("-")[2]
+
+        if (ultimo_mes == mes_actual):
+            suma += int(lista_b[indice])
         else:
-            casos_por_mes[mes] = casos
+            fechas.append(ultimo_mes+"-"+ano_actual)
+            casosPorMes.append(suma)
+            suma = 0
+            indice -= 1
 
-    meses = sorted(casos_por_mes.keys())
-    casos = [casos_por_mes[mes] for mes in meses]
+        if (indice+1 >= len(lista_a)):
+            fechas.append(mes_actual+"-"+ano_actual)
+            casosPorMes.append(suma)
 
+        indice += 1
+        ultimo_mes = mes_actual
+
+    graphics(fechas, casosPorMes, estadoSelect)
+
+
+def graphics(fechas, casosPorMes, estadoSelect):
     # Graficar la serie de datos
-    plt.plot(meses, casos)
+    fig, (ax) = plt.subplots(figsize=(12, 5))
+
+    ax.plot(fechas, casosPorMes)
     plt.xlabel('Mes')
     plt.ylabel('Casos Confirmados')
-    plt.title('Serie de datos por mes en ' + nombre_lugar)
+    plt.title('Serie de datos por mes en ' + estadoSelect)
+    plt.xticks(fechas, rotation=90)
+    plt.grid(True)
+
+    plt.margins(0.1)
+    plt.subplots_adjust(bottom=0.25)
     plt.show()
 
 
 def main():
-    print("Sistema de análisis de datos por lugar")
-    nombre_lugar = input(
-        "Ingrese el nombre del lugar "
-        "(puede ser el nombre del estado o 'Nacional'): ")
-    obtener_datos_lugar(nombre_lugar)
+    sub_menu()
 
 
 if __name__ == '__main__':

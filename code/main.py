@@ -48,7 +48,7 @@ def menu():
 
 
 def salir():
-    print("Ha salido del programa")
+    print("Finalizando programa ...")
 
 
 '''Importar los archivos que tengan el desarrollo segun la opcion'''
@@ -72,6 +72,7 @@ def funcion2():
 
 
 def funcion3():
+    fn3.sub_menu()
     print('\t\tObteniendo resultados...')
 
 
