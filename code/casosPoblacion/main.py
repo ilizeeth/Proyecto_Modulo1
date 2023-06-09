@@ -33,7 +33,7 @@ def return_matriz():
         for j in range(3, len(fila)):
             cantidad = fila[j]
             sum += int(cantidad)
-        porc = (int(fila[1])*100)/sum
+        porc = (sum*100)/int(fila[1])
         porcentaje.append(round(porc, 2))
         contagios.append(sum)
 
